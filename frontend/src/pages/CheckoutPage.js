@@ -353,7 +353,7 @@ const CheckoutPage = () => {
                   <div className="item-image-container">
                     <img 
                       src={item.productId.imageUrl ? 
-                        `http://localhost:5000${item.productId.imageUrl}` : 
+                        `${item.productId.imageUrl}` : 
                         '/fallback-image.jpg'}
                       alt={item.productId.name}
                       onError={(e) => {

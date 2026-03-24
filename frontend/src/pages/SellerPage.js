@@ -200,7 +200,7 @@ const SellerDashboard = () => {
   const handleUpdateProduct = async (productId, updates) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/products/${productId}`,
+        `/api/products/${productId}`,
         updates,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -255,7 +255,7 @@ const SellerDashboard = () => {
                     <img 
                     src={product.imageUrl.startsWith('http') ? 
                       product.imageUrl : 
-                      `http://localhost:5000${product.imageUrl}`
+                      `${product.imageUrl}`
                     }
                     alt={product.name}
                     onError={(e) => {
