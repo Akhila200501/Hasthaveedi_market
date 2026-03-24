@@ -3,6 +3,7 @@ services:
   - type: web
     name: Hasthaveedi_market
     env: node
+    nodeVersion: 20
     region: ohio
     plan: free
     buildCommand: npm run build
