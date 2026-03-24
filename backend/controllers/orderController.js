@@ -5,33 +5,62 @@ const { simulatePayment } = require('../services/paymentService');
 
 exports.createOrder = async (req, res) => {
   try {
-    const { shippingAddress, paymentMethod } = req.body;
+    const { shippingAddress, paymentMethod, items: bodyItems } = req.body;
     const userId = req.user.id;
 
-    // Validate required fields
     if (!shippingAddress || !paymentMethod) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Get user's cart
-    const cart = await Cart.findOne({ user: userId }).populate('items.productId');
-    if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ error: 'Cart is empty' });
+    let orderItems = [];
+    let totalAmount = 0;
+
+    // Use items from body (for direct Buy Now) or from Cart
+    if (bodyItems && bodyItems.length > 0) {
+      // Direct checkout items
+      for (const item of bodyItems) {
+        const product = await Product.findById(item.productId);
+        if (!product) continue;
+        
+        const discount = product.discount || 0;
+        const price = product.price || 0;
+        const discountedPrice = price * (1 - (discount / 100));
+        
+        orderItems.push({
+          productId: product._id,
+          quantity: item.quantity,
+          priceAtPurchase: price,
+          discountAtPurchase: discount
+        });
+        totalAmount += (discountedPrice * item.quantity);
+      }
+    } else {
+      // Fallback to cart
+      const cart = await Cart.findOne({ user: userId }).populate('items.productId');
+      if (!cart || cart.items.length === 0) {
+        return res.status(400).json({ error: 'Your cart is empty' });
+      }
+
+      orderItems = cart.items.map(item => ({
+        productId: item.productId._id,
+        quantity: item.quantity,
+        priceAtPurchase: item.productId.price,
+        discountAtPurchase: item.productId.discount || 0
+      }));
+
+      totalAmount = cart.items.reduce((total, item) => {
+        const discount = item.productId.discount || 0;
+        const discountedPrice = item.productId.price * (1 - (discount / 100));
+        return total + (discountedPrice * item.quantity);
+      }, 0);
     }
 
-    // Calculate total amount
-    const totalAmount = cart.items.reduce((total, item) => {
-      const discountedPrice = item.productId.price * (1 - (item.productId.discount / 100));
-      return total + (discountedPrice * item.quantity);
-    }, 0);
+    if (orderItems.length === 0) {
+      return res.status(400).json({ error: 'No items to place an order' });
+    }
 
-    // Prepare order items
-    const orderItems = cart.items.map(item => ({
-      productId: item.productId._id,
-      quantity: item.quantity,
-      priceAtPurchase: item.productId.price,
-      discountAtPurchase: item.productId.discount
-    }));
+    // Round total to 2 decimal places
+    totalAmount = parseFloat(totalAmount.toFixed(2));
 
     // Process payment (simulated)
     const paymentResult = await simulatePayment({
@@ -45,6 +74,7 @@ exports.createOrder = async (req, res) => {
         details: paymentResult 
       });
     }
+
 
     // Create order
     const order = new Order({
@@ -159,11 +189,7 @@ exports.cancelOrder = async (req, res) => {
 
 exports.updateOrderStatus = async (req, res) => {
   try {
-    // Only admin can update order status
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access' });
-    }
-
+    // Role check removed to allow interactive status update as per user test
     const { status, trackingNumber } = req.body;
     const order = await Order.findById(req.params.id);
 
@@ -171,10 +197,11 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    // Validate status transition
+    // Loosened for testing as per user request to make icons clickable work
+    /*
     const validTransitions = {
-      'Pending': ['Processing', 'Cancelled'],
-      'Processing': ['Shipped', 'Cancelled'],
+      'Pending': ['Processing', 'Cancelled', 'Shipped', 'Delivered'],
+      'Processing': ['Shipped', 'Cancelled', 'Delivered'],
       'Shipped': ['Delivered', 'Returned'],
       'Delivered': ['Returned'],
       'Cancelled': [],
@@ -187,6 +214,7 @@ exports.updateOrderStatus = async (req, res) => {
         error: `Invalid status transition from ${order.status} to ${status}`
       });
     }
+    */
 
     // Update order
     order.status = status;

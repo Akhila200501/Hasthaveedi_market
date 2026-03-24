@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/TrackingStepper.css';
 
-const TrackingStepper = ({ status }) => {
+const TrackingStepper = ({ status, onStatusChange }) => {
   const steps = [
     { id: 'Pending', label: 'Order Placed', icon: '📦' },
     { id: 'Processing', label: 'Processing', icon: '🔄' },
@@ -17,7 +17,11 @@ const TrackingStepper = ({ status }) => {
     <div className="tracking-stepper">
       {steps.map((step, index) => (
         <React.Fragment key={step.id}>
-          <div className={`step ${index <= activeIndex ? 'active' : ''}`}>
+          <div 
+            className={`step ${index <= activeIndex ? 'active' : ''} ${onStatusChange ? 'clickable' : ''}`}
+            onClick={() => onStatusChange && onStatusChange(step.id)}
+            title={`Set status to ${step.label}`}
+          >
             <div className="step-indicator">
               <div className="step-icon">
                 {index < activeIndex ? '✓' : step.icon}

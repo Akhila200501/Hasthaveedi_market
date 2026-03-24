@@ -43,11 +43,7 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/cart', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await authFetch('/api/cart');
 
       if (!response.ok) {
         throw new Error('Failed to fetch cart');
@@ -56,22 +52,8 @@ export const CartProvider = ({ children }) => {
       const data = await response.json();
       const serverCart = Array.isArray(data) ? data : [];
       
-      // Merge server cart with local cart
-      setCartItems(prevItems => {
-        const merged = [...prevItems];
-        serverCart.forEach(serverItem => {
-          const existingIndex = merged.findIndex(
-            item => item.productId?._id === serverItem.productId?._id
-          );
-          if (existingIndex >= 0) {
-            // Prefer server quantity if item exists in both
-            merged[existingIndex] = serverItem;
-          } else {
-            merged.push(serverItem);
-          }
-        });
-        return merged;
-      });
+      // Replace local cart with server cart (server is source of truth)
+      setCartItems(serverCart);
     } catch (error) {
       console.error('Error fetching cart:', error);
       setError(error.message);
@@ -87,10 +69,10 @@ export const CartProvider = ({ children }) => {
       // For guests, add to local cart only
       if (!token) {
         setCartItems(prev => {
-          const existingItem = prev.find(item => item.productId._id === productId);
+          const existingItem = prev.find(item => item.productId?._id === productId);
           if (existingItem) {
             return prev.map(item =>
-              item.productId._id === productId
+              item.productId?._id === productId
                 ? { ...item, quantity: item.quantity + quantity }
                 : item
             );
@@ -100,12 +82,12 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      // Replace fetch calls with authFetch
-const response = await authFetch('/api/cart', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ productId, quantity })
-});
+      // POST to /api/cart/add (the correct backend route)
+      const response = await authFetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity })
+      });
 
       if (!response.ok) {
         throw new Error('Failed to add to cart');
@@ -131,12 +113,9 @@ const response = await authFetch('/api/cart', {
 
       const token = localStorage.getItem('token');
       if (token) {
-        await fetch('http://localhost:5000/api/cart/update', {
+        await authFetch('/api/cart/update', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productId, quantity: newQuantity })
         });
       }
@@ -150,16 +129,13 @@ const response = await authFetch('/api/cart', {
   const removeFromCart = async (productId) => {
     try {
       // Remove from local state immediately
-      setCartItems(prev => prev.filter(item => item.productId._id !== productId));
+      setCartItems(prev => prev.filter(item => item.productId?._id !== productId));
 
       const token = localStorage.getItem('token');
       if (token) {
-        await fetch('http://localhost:5000/api/cart/remove', {
+        await authFetch('/api/cart/remove', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productId })
         });
       }
@@ -176,11 +152,8 @@ const response = await authFetch('/api/cart', {
       
       const token = localStorage.getItem('token');
       if (token) {
-        await fetch('http://localhost:5000/api/cart/clear', {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        await authFetch('/api/cart/clear', {
+          method: 'DELETE'
         });
       }
     } catch (error) {

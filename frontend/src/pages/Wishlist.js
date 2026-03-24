@@ -157,55 +157,57 @@ const WishlistPage = () => {
                     e.target.src = '/fallback-image.jpg';
                   }}
                 />
-                <h3>{product.name || 'Unnamed Product'}</h3>
-                <p className="craft-type">{product.craft || 'Unknown Craft'}</p>
-                
-                <div className="price-container">
-                  {product.discount > 0 ? (
-                    <>
-                      <span className="original-price">
+                <div className="product-info">
+                  <h3>{product.name || 'Unnamed Product'}</h3>
+                  <p className="craft-type">{product.craft || 'Unknown Craft'}</p>
+                  
+                  <div className="price-container">
+                    {product.discount > 0 ? (
+                      <>
+                        <span className="original-price">
+                          ₹{product.price.toLocaleString('en-IN')}
+                        </span>
+                        <span className="discounted-price">
+                          ₹{discountedPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                        </span>
+                        <span className="discount-badge">
+                          {product.discount}% OFF
+                        </span>
+                      </>
+                    ) : (
+                      <span className="price">
                         ₹{product.price.toLocaleString('en-IN')}
                       </span>
-                      <span className="discounted-price">
-                        ₹{discountedPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-                      </span>
-                      <span className="discount-badge">
-                        {product.discount}% OFF
-                      </span>
-                    </>
-                  ) : (
-                    <span className="price">
-                      ₹{product.price.toLocaleString('en-IN')}
-                    </span>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                <p className={`availability ${product.availability ? 'in-stock' : 'out-of-stock'}`}>
-                  {product.availability ? 'In Stock' : 'Out of Stock'}
-                </p>
+                  <p className={`availability ${product.availability ? 'in-stock' : 'out-of-stock'}`}>
+                    {product.availability ? 'In Stock' : 'Out of Stock'}
+                  </p>
 
-                <div className="product-actions">
-                  <button 
-                    className="buy-now" 
-                    onClick={() => handleBuyNow(product._id)} 
-                    disabled={!product.availability}
-                  >
-                    Buy Now
-                  </button>
-                  <button 
-                    className="add-to-cart" 
-                    onClick={() => handleAddToCart(product._id)}
-                    disabled={!product.availability}
-                  >
-                    Add to Cart
-                  </button>
-                  <FaHeart
-                    className="wishlist-icon-inline"
-                    color="red"
-                    size={30}
-                    onClick={() => toggleWishlist(product._id)}
-                    style={{ cursor: 'pointer' }}
-                  />
+                  <div className="product-actions">
+                    <button 
+                      className="buy-now" 
+                      onClick={() => handleBuyNow(product._id)} 
+                      disabled={!product.availability}
+                    >
+                      Buy Now
+                    </button>
+                    <button 
+                      className="add-to-cart" 
+                      onClick={() => handleAddToCart(product._id)}
+                      disabled={!product.availability}
+                    >
+                      Add to Cart
+                    </button>
+                    <FaHeart
+                      className="wishlist-icon-inline"
+                      color="red"
+                      size={30}
+                      onClick={() => toggleWishlist(product._id)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </div>
                 </div>
               </div>
             );

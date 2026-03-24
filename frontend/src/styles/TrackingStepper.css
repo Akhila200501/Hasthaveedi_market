@@ -13,7 +13,18 @@
   position: relative;
   z-index: 1;
   flex: 1;
+  transition: all 0.2s ease;
 }
+
+.step.clickable {
+  cursor: pointer;
+}
+
+.step.clickable:hover .step-indicator {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
 
 .step-indicator {
   width: 3rem;

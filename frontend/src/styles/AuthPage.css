@@ -20,102 +20,96 @@ html, body {
   min-height: 100vh;
   padding: 20px;
   width: 100%;
-  background: 
-              url('https://res.cloudinary.com/dvdvz4lko/image/upload/v1745168631/image_vaog11.jpg');
+  background: url('../assets/images/auth_bg.png') no-repeat center center fixed;
   background-size: cover;
-  background-position: center;
-  background-blend-mode: overlay;
+  position: relative;
 }
 
-/* Form styling */
-form {
-  background-color:transparent;
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  width: 100%;
-  max-width: 450px;
-  text-align: center;
-  transition: all 0.3s ease;
-  backdrop-filter: none;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+/* Add an overlay to the background for better contrast */
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35); /* Subtle dark overlay */
+  z-index: 0;
 }
 
-/* Title Styling (Login / Register) */
+/* Title Styling (Outside card) */
 .auth-container h2 {
-  margin-bottom: 1.5rem;
-  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  font-size: 2.8rem;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 800;
   text-align: center;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  font-family: 'Playfair Display', serif;
+  letter-spacing: -0.5px;
+}
+
+/* Form card styling */
+form {
+  background-color: #ffffff;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  transition: transform 0.3s ease;
+  z-index: 1;
+  border: none;
+}
+
+form:hover {
+  transform: translateY(-5px);
 }
 
 /* Input Fields */
 input,
 select {
   width: 100%;
-  padding: 1rem;
-  margin: 0.75rem 0;
-  border-radius: 8px;
-  border: 1px solid #e0e3e7;
+  padding: 1.1rem;
+  margin: 0.8rem 0;
+  border-radius: 12px;
+  border: 2px solid #edf2f7;
   font-size: 16px;
   transition: all 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: #f7fafc;
+  color: #2d3748;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #5a67d8;
-  box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.2);
-  background-color: white;
-}
-
-/* Password Field */
-.password-field {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-field input {
-  padding-right: 3.5rem;
-}
-
-.show-password-btn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: #5a67d8;
-  cursor: pointer;
-  font-size: 0.85em;
-  padding: 0.5rem;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.show-password-btn:hover {
-  color: #434190;
+  border-color: #4a5568;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(74, 85, 104, 0.1);
 }
 
 /* Buttons */
 .submit-btn {
   width: 100%;
-  padding: 1rem;
-  margin: 1.5rem 0 1rem;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  padding: 1.1rem;
+  margin: 2rem 0 1rem;
+  background: #3b82f6; /* Modern Blue like the image */
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+.submit-btn:hover {
+  background: #2563eb;
+  transform: scale(1.02);
+}
+
 
 .toggle-btn {
   width: auto;

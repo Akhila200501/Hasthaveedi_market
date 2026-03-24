@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaHeart } from 'react-icons/fa';
+import { useCart } from '../contexts/CartContext';
 import '../styles/ShopPage.css';
 
 const ShopPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { addToCart, fetchCartItems } = useCart();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFiltered] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [cartFeedback, setCartFeedback] = useState('');
 
   const craft = new URLSearchParams(location.search).get('craft');
 
@@ -102,36 +105,30 @@ const ShopPage = () => {
         navigate('/auth');
         return;
       }
-  
-      // FIRST find in filteredProducts, then fall back to all products
-      const product = filteredProducts.find(p => p._id === productId);
-  
+
+      const product = filteredProducts.find(p => p._id === productId) ||
+                      products.find(p => p._id === productId);
+
       if (!product) {
         alert('Product not found');
         return;
       }
-  
-      if (!product.availability) {
+
+      // Explicit check — only block if explicitly false
+      if (product.availability === false) {
         alert('This product is out of stock and cannot be added to cart');
         return;
       }
-    
-  
-      const response = await fetch('http://localhost:5000/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ productId })
-      });
-  
-      if (!response.ok) throw new Error('Failed to add to cart');
-      
-      alert('Product added to cart!');
+
+      // Use CartContext's addToCart — updates state AND calls the API
+      await addToCart(productId, 1);
+      await fetchCartItems(); // Refresh cart from server
+
+      setCartFeedback('✅ Added to cart!');
+      setTimeout(() => setCartFeedback(''), 2000);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert(error.message);
+      alert('Failed to add to cart: ' + error.message);
     }
   };
   
@@ -193,6 +190,18 @@ const ShopPage = () => {
         </div>
       )}
 
+      {cartFeedback && (
+        <div style={{
+          position: 'fixed', top: '80px', right: '24px', zIndex: 9999,
+          background: '#2ecc71', color: 'white', padding: '12px 24px',
+          borderRadius: '8px', fontWeight: '600', fontSize: '1rem',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          {cartFeedback}
+        </div>
+      )}
+
       <div className="products-grid">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => {
@@ -212,55 +221,57 @@ const ShopPage = () => {
 
                   onClick={() => setSelectedProduct(product)}
                 />
-                <h3>{product.name || 'Unnamed Product'}</h3>
-                <p className="craft-type">{product.craft || 'Unknown Craft'}</p>
-                
-                <div className="price-container">
-                  {product.discount > 0 ? (
-                    <>
-                      <span className="original-price">
+                <div className="product-info">
+                  <h3>{product.name || 'Unnamed Product'}</h3>
+                  <p className="craft-type">{product.craft || 'Unknown Craft'}</p>
+                  
+                  <div className="price-container">
+                    {product.discount > 0 ? (
+                      <>
+                        <span className="original-price">
+                          ₹{product.price.toLocaleString('en-IN')}
+                        </span>
+                        <span className="discounted-price">
+                          ₹{discountedPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                        </span>
+                        <span className="discount-badge">
+                          {product.discount}% OFF
+                        </span>
+                      </>
+                    ) : (
+                      <span className="price">
                         ₹{product.price.toLocaleString('en-IN')}
                       </span>
-                      <span className="discounted-price">
-                        ₹{discountedPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-                      </span>
-                      <span className="discount-badge">
-                        {product.discount}% OFF
-                      </span>
-                    </>
-                  ) : (
-                    <span className="price">
-                      ₹{product.price.toLocaleString('en-IN')}
-                    </span>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                <p className={`availability ${product.availability ? 'in-stock' : 'out-of-stock'}`}>
-                  {product.availability ? 'In Stock' : 'Out of Stock'}
-                </p>
+                  <p className={`availability ${product.availability ? 'in-stock' : 'out-of-stock'}`}>
+                    {product.availability ? 'In Stock' : 'Out of Stock'}
+                  </p>
 
-                <div className="product-actions">
-                  <button 
-                    className="buy-now" 
-                    onClick={() => handleBuyNow(product._id)}
-                    disabled={!product.availability}
-                  >
-                    Buy Now
-                  </button>
-                  <button 
-                    className="add-to-cart" 
-                    onClick={() => handleAddToCart(product._id)}
-                    disabled={!product.availability}
-                  >
-                    Add to Cart
-                  </button>
-                  <FaHeart
-                    className="wishlist-icon-inline"
-                    color={wishlist.includes(product._id) ? 'red' : 'gray'}
-                    size={30}
-                    onClick={() => toggleWishlist(product._id)}
-                    style={{ cursor: 'pointer' }}
-                  />
+                  <div className="product-actions">
+                    <button 
+                      className="buy-now" 
+                      onClick={() => handleBuyNow(product._id)}
+                      disabled={!product.availability}
+                    >
+                      Buy Now
+                    </button>
+                    <button 
+                      className="add-to-cart" 
+                      onClick={() => handleAddToCart(product._id)}
+                      disabled={!product.availability}
+                    >
+                      Add to Cart
+                    </button>
+                    <FaHeart
+                      className="wishlist-icon-inline"
+                      color={wishlist.includes(product._id) ? 'red' : 'gray'}
+                      size={30}
+                      onClick={() => toggleWishlist(product._id)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </div>
                 </div>
               </div>
             );

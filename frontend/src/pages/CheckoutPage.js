@@ -31,6 +31,7 @@ const CheckoutPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [orderData, setOrderData] = useState(null);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [directCheckoutItem, setDirectCheckoutItem] = useState(null);
   const { cartItems, clearCart } = useCart();
 
@@ -126,9 +127,13 @@ const CheckoutPage = () => {
     }
   };
 
-  const handlePaymentSuccess = async (paymentResult) => {
+  const handlePaymentSuccess = async (paymentResult, pendingOrderData = orderData) => {
     try {
+      setIsPaymentProcessing(true);
       const token = localStorage.getItem('token');
+      if (!pendingOrderData) {
+        throw new Error('Order data is not set. Please retry checkout.');
+      }
       const response = await fetch('http://localhost:5000/api/orders', {
         method: 'POST',
         headers: {
@@ -136,7 +141,7 @@ const CheckoutPage = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          ...orderData,
+          ...pendingOrderData,
           paymentStatus: paymentResult.status
         })
       });
@@ -163,6 +168,8 @@ const CheckoutPage = () => {
         ...prev,
         submitError: error.message || 'Order creation failed after payment.'
       }));
+    } finally {
+      setIsPaymentProcessing(false);
     }
   };
 
@@ -424,9 +431,10 @@ const CheckoutPage = () => {
               
               {paymentMethod === 'CashOnDelivery' && (
                 <CashOnDeliveryConfirmation 
-                  amount={parseFloat(orderData.totalAmount)}
-                  onConfirm={handlePaymentSuccess}
+                  amount={parseFloat(orderData?.totalAmount || 0)}
+                  onConfirm={(paymentResult) => handlePaymentSuccess(paymentResult, orderData)}
                   onCancel={() => setShowPaymentModal(false)}
+                  isProcessing={isPaymentProcessing}
                 />
               )}
             </div>

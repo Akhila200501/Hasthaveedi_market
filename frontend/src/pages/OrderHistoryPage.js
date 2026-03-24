@@ -12,6 +12,11 @@ const OrderHistoryPage = () => {
     const fetchOrders = async () => {
       try {
         const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/auth');
+          return;
+        }
+
         const response = await fetch('http://localhost:5000/api/orders/history', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -19,12 +24,17 @@ const OrderHistoryPage = () => {
         });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            navigate('/auth');
+            return;
+          }
           throw new Error('Failed to fetch orders');
         }
 
         const data = await response.json();
-        setOrders(data.orders);
+        setOrders(data.orders || []);
       } catch (err) {
+        console.error('Fetch error:', err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -32,7 +42,7 @@ const OrderHistoryPage = () => {
     };
 
     fetchOrders();
-  }, []);
+  }, [navigate]);
 
   const handleViewDetails = (orderId) => {
     navigate(`/orders/${orderId}`);
@@ -121,17 +131,25 @@ const handleCancelOrder = async (orderId) => {
                 </div>
                 
                 <div className="order-items-preview">
-                  {order.items.slice(0, 3).map((item, index) => (
-                    <div key={index} className="item-preview">
-                      <img 
-                        src={item.productId.imageUrl} 
-                        alt={item.productId.name} 
-                        className="item-image"
-                      />
-                      <span className="item-quantity">x{item.quantity}</span>
-                    </div>
-                  ))}
-                  {order.items.length > 3 && (
+                  {order.items && order.items.slice(0, 3).map((item, index) => {
+                    const product = item?.productId || {};
+                    const rawUrl = product.imageUrl || '/fallback-image.jpg';
+                    const imageUrl = rawUrl.startsWith('http') ? rawUrl : `http://localhost:5000${rawUrl}`;
+                    const name = product.name || 'Unknown Product';
+
+                    return (
+                      <div key={index} className="item-preview">
+                        <img 
+                          src={imageUrl} 
+                          alt={name} 
+                          className="item-image"
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/50'; }}
+                        />
+                        <span className="item-quantity">x{item.quantity}</span>
+                      </div>
+                    );
+                  })}
+                  {order.items && order.items.length > 3 && (
                     <div className="more-items">+{order.items.length - 3} more</div>
                   )}
                 </div>

@@ -15,7 +15,7 @@ import OrderConfirmation from './pages/OrderConfirmation';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import GiftAssistantPage from './pages/GiftAssistantPage';
-
+import About from './pages/About';
 
 const App = () => {
   return (
@@ -36,6 +36,7 @@ const App = () => {
       <Route path="/orders" element={<OrderHistoryPage />} />
       <Route path="/orders/:id" element={<OrderDetailsPage />} />
       <Route path="/gift-assistant" element={<GiftAssistantPage />} />
+      <Route path="/about" element={<About />} />
     </Routes>
     </CartProvider>
   );

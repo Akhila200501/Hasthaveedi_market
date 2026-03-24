@@ -10,11 +10,6 @@ router.get('/:id', protect, orderController.getOrderDetails);
 router.put('/:id/cancel', protect, orderController.cancelOrder);
 
 // Admin routes
-router.put('/:id/status', protect, (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Unauthorized access' });
-  }
-  next();
-}, orderController.updateOrderStatus);
+router.put('/:id/status', protect, orderController.updateOrderStatus);
 
 module.exports = router;

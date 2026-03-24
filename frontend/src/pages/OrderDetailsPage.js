@@ -91,6 +91,35 @@ const OrderDetailsPage = () => {
     return <div className="not-found">Order not found</div>;
   }
 
+  const handleStatusChange = async (newStatus) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update order status');
+      }
+
+      const data = await response.json();
+      setOrder(data.order);
+      alert(`Order status updated to ${newStatus}`);
+    } catch (err) {
+      console.error('Status Update Error:', err);
+      alert(`Error updating status: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="order-details-page">
       <button 
@@ -101,7 +130,7 @@ const OrderDetailsPage = () => {
       </button>
       
       <div className="order-header">
-      <TrackingStepper status={order.status} />
+      <TrackingStepper status={order.status} onStatusChange={handleStatusChange} />
         <h2>Order #{order._id.substring(0, 8)}</h2>
         <div className="order-meta">
           <span>Placed on {new Date(order.createdAt).toLocaleDateString()}</span>
@@ -122,9 +151,10 @@ const OrderDetailsPage = () => {
               return (
                 <div key={item.productId._id} className="order-item">
                   <img 
-                    src={item.productId.imageUrl} 
+                    src={item.productId.imageUrl?.startsWith('http') ? item.productId.imageUrl : `http://localhost:5000${item.productId.imageUrl}`}
                     alt={item.productId.name} 
                     className="item-image"
+                    onError={(e) => { e.target.src = '/fallback-image.jpg'; }}
                   />
                   <div className="item-details">
                     <h4>{item.productId.name}</h4>

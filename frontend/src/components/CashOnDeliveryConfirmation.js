@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/CashOnDeliveryConfirmation.css';
 
-const CashOnDeliveryConfirmation = ({ amount, onConfirm, onCancel }) => {
+const CashOnDeliveryConfirmation = ({ amount, onConfirm, onCancel, isProcessing }) => {
   return (
     <div className="cod-confirmation">
       <h3>Cash on Delivery</h3>
@@ -16,12 +16,17 @@ const CashOnDeliveryConfirmation = ({ amount, onConfirm, onCancel }) => {
       </div>
       
       <div className="cod-actions">
-        <button onClick={onCancel}>Cancel</button>
-        <button onClick={() => onConfirm({
-          transactionId: `COD-${Date.now()}`,
-          amount,
-          status: 'Pending' // Will be completed when delivered
-        })}>Confirm Order</button>
+        <button onClick={onCancel} disabled={isProcessing}>Cancel</button>
+        <button
+          onClick={() => onConfirm({
+            transactionId: `COD-${Date.now()}`,
+            amount,
+            status: 'Pending' // Will be completed when delivered
+          })}
+          disabled={isProcessing}
+        >
+          {isProcessing ? 'Processing...' : 'Confirm Order'}
+        </button>
       </div>
     </div>
   );
