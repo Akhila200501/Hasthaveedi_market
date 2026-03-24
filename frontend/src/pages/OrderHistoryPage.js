@@ -17,7 +17,7 @@ const OrderHistoryPage = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/orders/history', {
+        const response = await fetch('/api/orders/history', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -76,7 +76,7 @@ const handleCancelOrder = async (orderId) => {
   
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/orders/${orderId}/cancel`, {
+    const response = await fetch(`/api/orders/${orderId}/cancel`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -134,7 +134,7 @@ const handleCancelOrder = async (orderId) => {
                   {order.items && order.items.slice(0, 3).map((item, index) => {
                     const product = item?.productId || {};
                     const rawUrl = product.imageUrl || '/fallback-image.jpg';
-                    const imageUrl = rawUrl.startsWith('http') ? rawUrl : `http://localhost:5000${rawUrl}`;
+                    const imageUrl = rawUrl.startsWith('http') ? rawUrl : `${rawUrl}`;
                     const name = product.name || 'Unknown Product';
 
                     return (

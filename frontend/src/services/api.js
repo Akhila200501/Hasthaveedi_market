@@ -1,6 +1,6 @@
 //frontend/services/api.js
 
-const API_URL = 'http://localhost:5000'; // backend URL
+const API_URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000'; // backend URL
 
 export const authFetch = async (url, options = {}) => {
   // Get token or redirect to login

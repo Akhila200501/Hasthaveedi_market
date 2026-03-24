@@ -49,7 +49,7 @@ const SellerDashboard = () => {
         }
 
         const response = await axios.get(
-          'http://localhost:5000/api/products/my-products',
+          '/api/products/my-products',
           {
             headers: { Authorization: `Bearer ${token}` },
             timeout: 5000
@@ -98,7 +98,7 @@ const SellerDashboard = () => {
       formData.append('image', file);
   
       const response = await axios.post(
-        'http://localhost:5000/api/products/upload',
+        '/api/products/upload',
         formData,
         {
           headers: {
@@ -146,7 +146,7 @@ const SellerDashboard = () => {
       };
   
       const response = await axios.post(
-        'http://localhost:5000/api/products/add',
+        '/api/products/add',
         productToAdd,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -185,7 +185,7 @@ const SellerDashboard = () => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/${productId}`, {
+      await axios.delete(`/api/products/${productId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setProducts(prev => prev.filter(p => p._id !== productId));

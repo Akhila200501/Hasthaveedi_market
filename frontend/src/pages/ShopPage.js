@@ -25,8 +25,8 @@ const ShopPage = () => {
         setError(null);
         
         const url = craft 
-          ? `http://localhost:5000/api/products/craft/${encodeURIComponent(craft)}`
-          : 'http://localhost:5000/api/products';
+          ? `/api/products/craft/${encodeURIComponent(craft)}`
+          : '/api/products';
 
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -46,7 +46,7 @@ const ShopPage = () => {
         const token = localStorage.getItem('token');
         if (!token) return;
         
-        const response = await fetch('http://localhost:5000/api/products/wishlist', {
+        const response = await fetch('/api/products/wishlist', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -74,7 +74,7 @@ const ShopPage = () => {
       }
 
       const isWishlisted = wishlist.includes(productId);
-      const url = `http://localhost:5000/api/products/wishlist/${isWishlisted ? 'remove' : 'add'}`;
+      const url = `/api/products/wishlist/${isWishlisted ? 'remove' : 'add'}`;
       
       const response = await fetch(url, {
         method: 'POST',
@@ -211,7 +211,7 @@ const ShopPage = () => {
                   <img 
   src={product.imageUrl.startsWith('http') ? 
     product.imageUrl : 
-    `http://localhost:5000${product.imageUrl}`
+    `${product.imageUrl}`
   }
   alt={product.name}
   onError={(e) => {
@@ -295,7 +295,7 @@ const ShopPage = () => {
             <h3>{selectedProduct.name}</h3>
             <img 
               src={selectedProduct.imageUrl ? 
-                `http://localhost:5000${selectedProduct.imageUrl}` : 
+                `${selectedProduct.imageUrl}` : 
                 '/fallback-image.jpg'}
               alt={selectedProduct.name}
               className="modal-image"

@@ -148,7 +148,7 @@ const WishlistPage = () => {
               <div key={product._id} className="product-card">
                 <img
                   src={product.imageUrl ? 
-                    `http://localhost:5000${product.imageUrl}` : 
+                    `${product.imageUrl}` : 
                     '/fallback-image.jpg'}
                   alt={product.name || "Product"}
                   className="product-image"

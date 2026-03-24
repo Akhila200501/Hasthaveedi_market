@@ -3,6 +3,8 @@ services:
   - type: web
     name: Hasthaveedi_market
     env: node
+    region: ohio
+    plan: free
     buildCommand: npm run build
     startCommand: npm start
     envVars:
@@ -12,3 +14,18 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: EMAIL_SERVICE
+        value: gmail
+      - key: EMAIL_USERNAME
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: FRONTEND_URL
+        sync: false # Set this to your Render URL (e.g. https://hasthaveedi-market.onrender.com)
+

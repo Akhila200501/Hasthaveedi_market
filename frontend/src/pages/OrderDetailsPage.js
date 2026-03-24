@@ -15,7 +15,7 @@ const OrderDetailsPage = () => {
     const fetchOrderDetails = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/orders/${id}`, {
+        const response = await fetch(`/api/orders/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -43,7 +43,7 @@ const OrderDetailsPage = () => {
     try {
       setCancelling(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/orders/${id}/cancel`, {
+      const response = await fetch(`/api/orders/${id}/cancel`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -95,7 +95,7 @@ const OrderDetailsPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+      const response = await fetch(`/api/orders/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ const OrderDetailsPage = () => {
               return (
                 <div key={item.productId._id} className="order-item">
                   <img 
-                    src={item.productId.imageUrl?.startsWith('http') ? item.productId.imageUrl : `http://localhost:5000${item.productId.imageUrl}`}
+                    src={item.productId.imageUrl?.startsWith('http') ? item.productId.imageUrl : `${item.productId.imageUrl}`}
                     alt={item.productId.name} 
                     className="item-image"
                     onError={(e) => { e.target.src = '/fallback-image.jpg'; }}
