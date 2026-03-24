@@ -54,6 +54,19 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use("/api/gemini", geminiRoutes);
 
+// 5. Serving Frontend In Production
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+  app.get('*', (req, res) => {
+    // Only serve index.html if it's not an API call
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.resolve(__dirname, '../frontend', 'build', 'index.html'));
+    }
+  });
+}
+
 app.get('/api/test-gemini', async (req, res) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });

@@ -1,0 +1,25 @@
+# HasthaVeedhi Unified Blueprint
+services:
+  - type: web
+    name: hasthaveedhi-market
+    env: node
+    plan: free # Can be upgraded for more resources
+    buildCommand: npm install && npm run build-frontend && cd backend && npm install
+    startCommand: cd backend && cross-env NODE_ENV=production node index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: GEMINI_API_KEY
+        sync: false # User must set this manually in the dashboard for security
+      - key: MONGO_URI
+        sync: false # User must set this manually in the dashboard for security
+      - key: JWT_SECRET
+        sync: false # User must set this manually in the dashboard for security
+      - key: EMAIL_USERNAME
+        sync: false # Set manually
+      - key: EMAIL_PASSWORD
+        sync: false # Set manually
+      - key: EMAIL_FROM
+        sync: false # Set manually
