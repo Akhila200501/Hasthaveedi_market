@@ -1,18 +1,11 @@
 {
   "name": "hasthaveedhi-root",
   "version": "1.0.0",
-  "description": "Unified HasthaVeedhi project for production deployment",
   "scripts": {
-    "install-backend": "cd backend && npm install",
-    "install-frontend": "cd frontend && npm install",
-    "install-all": "npm run install-backend && npm run install-frontend",
-    "build-frontend": "cd frontend && npm run build",
-    "heroku-postbuild": "npm run install-all && npm run build-frontend",
-    "start": "cd backend && cross-env NODE_ENV=production node index.js",
-    "dev": "concurrently \"cd backend && nodemon index.js\" \"cd frontend && npm start\""
+    "build": "npm install && cd frontend && npm install && npm run build && cd ../backend && npm install",
+    "start": "cd backend && node index.js"
   },
   "dependencies": {
-    "concurrently": "^8.2.2",
     "cross-env": "^7.0.3"
   }
 }
