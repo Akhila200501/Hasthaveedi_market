@@ -42,6 +42,9 @@ app.use(cors({
 
 app.use(express.json());
 
+// Healthy Check
+app.get('/api/health', (req, res) => res.status(200).send('OK'));
+
 
 // 3. Route configurations
 app.use('/auth', require('./routes/auth'));
@@ -54,22 +57,25 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use("/api/gemini", geminiRoutes);
 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
+
 // 5. Serving Frontend In Production
 if (process.env.NODE_ENV === 'production') {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  const buildPath = path.join(__dirname, '../frontend/build');
+  app.use(express.static(buildPath));
 
   app.get('*', (req, res) => {
-    // Only serve index.html if it's not an API call
     if (!req.path.startsWith('/api')) {
-      res.sendFile(path.resolve(__dirname, '../frontend', 'build', 'index.html'));
+      res.sendFile(path.join(buildPath, 'index.html'));
     }
   });
 }
 
 app.get('/api/test-gemini', async (req, res) => {
+  if (!genAI) return res.status(503).send("Gemini API not configured");
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent("Hello");
     res.send(result.response.text());
   } catch (err) {
