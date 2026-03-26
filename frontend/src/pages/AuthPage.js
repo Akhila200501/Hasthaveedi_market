@@ -18,6 +18,15 @@ const AuthPage = () => {
   const [resendDisabled, setResendDisabled] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
+  
+  // Prevent logged-in users from seeing the login page
+  React.useEffect(() => {
+    const isLoggedIn = sessionStorage.getItem('loggedIn');
+    const role = localStorage.getItem('role');
+    if (isLoggedIn === 'true') {
+      navigate(role === 'customer' ? '/customer-map' : '/seller-dashboard');
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

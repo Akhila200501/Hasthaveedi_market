@@ -5,7 +5,12 @@ const API_URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5
 export const authFetch = async (url, options = {}) => {
   // Get token or redirect to login
   const token = localStorage.getItem('token');
-  if (!token) window.location.href = '/auth';
+  if (!token) {
+    if (window.location.pathname !== '/auth' && window.location.pathname !== '/') {
+      window.location.href = '/auth';
+    }
+    return { ok: false, status: 401, json: () => Promise.resolve({ error: 'Unauthorized' }) };
+  }
 
   // Set auth header
   options.headers = {
@@ -22,7 +27,11 @@ export const authFetch = async (url, options = {}) => {
       options.headers.Authorization = `Bearer ${newToken}`;
       response = await fetch(`${API_URL}${url}`, options);
     } catch (error) {
-      window.location.href = '/auth';
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('loggedIn');
+      if (window.location.pathname !== '/auth' && window.location.pathname !== '/') {
+        window.location.href = '/auth';
+      }
       throw error;
     }
   }
@@ -63,9 +72,9 @@ export const login = async (credentials) => {
     localStorage.setItem('token', data.token);
     localStorage.setItem('role', data.role);
     localStorage.setItem('user', JSON.stringify(data));
-    
+
     sessionStorage.setItem('loggedIn', 'true');
-    
+
     return data;
   } catch (error) {
     throw new Error(error.message || 'Error during login.');
@@ -77,15 +86,19 @@ export const refreshToken = async () => {
       method: 'POST',
       credentials: 'include' // For http-only cookies if using them
     });
-    
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Token refresh failed');
-    
+
     localStorage.setItem('token', data.token);
     return data.token;
   } catch (error) {
     // Redirect to login if refresh fails
-    window.location.href = '/auth';
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('loggedIn');
+    if (window.location.pathname !== '/auth' && window.location.pathname !== '/') {
+      window.location.href = '/auth';
+    }
     throw error;
   }
 };
