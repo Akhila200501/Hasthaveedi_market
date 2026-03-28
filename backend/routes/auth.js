@@ -3,9 +3,11 @@ const { login, register } = require('../controllers/userController');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { sendVerificationEmail, transporter } = require('../controllers/emailController');
 
 router.post('/register', register);
 router.post('/login', login);
+
 
 router.post('/refresh', async (req, res) => {
   try {
@@ -50,12 +52,20 @@ router.get('/verify-email', async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({ 
-      email: decoded.email,
-      verificationToken: token
-    });
+    const user = await User.findOne({ email: decoded.email });
 
     if (!user) {
+      return res.status(400).json({ error: 'Invalid verification token' });
+    }
+
+    if (user.isVerified) {
+      return res.status(200).json({ 
+        message: 'Email is already verified! You can now login.',
+        email: user.email
+      });
+    }
+
+    if (user.verificationToken !== token) {
       return res.status(400).json({ error: 'Invalid or expired verification token' });
     }
 

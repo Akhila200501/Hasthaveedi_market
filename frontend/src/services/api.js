@@ -49,10 +49,27 @@ export const register = async (userData) => {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Registration failed.');
+    if (!res.ok) throw new Error(data.error || data.message || 'Registration failed.');
     return data;
   } catch (error) {
     throw new Error(error.message || 'Error during registration.');
+  }
+};
+
+
+export const resendVerification = async (data) => {
+  try {
+    const res = await fetch(`${API_URL}/auth/resend-verification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || result.message || 'Failed to resend verification.');
+    return result;
+  } catch (error) {
+    throw new Error(error.message || 'Error resending verification.');
   }
 };
 

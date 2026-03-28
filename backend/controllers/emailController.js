@@ -9,20 +9,26 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-exports.sendVerificationEmail = async (email, verificationToken) => {
+const sendVerificationEmail = async (email, verificationToken) => {
   try {
     const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+
 
     const mailOptions = {
       from: process.env.EMAIL_FROM,
       to: email,
-      subject: 'Verify Your Email',
-      text: `Click here to verify your email: ${verificationUrl}\n\nThis link expires in 24 hours.`,
+      subject: 'Verify Your Email - HasthaVeedhi',
+      text: `Welcome to HasthaVeedhi!\n\nPlease click here to verify your email: ${verificationUrl}\n\nThis link expires in 24 hours.`,
       html: `
-        <p>Please click the link below to verify your email:</p>
-        <a href="${verificationUrl}">Verify Email</a>
-        <p><strong>This link expires in 24 hours.</strong></p>
-        <p>If you didn't request this, please ignore this email.</p>
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+          <h2 style="color: #4a90e2;">Welcome to HasthaVeedhi!</h2>
+          <p>Thank you for registering. Please click the button below to verify your email address:</p>
+          <a href="${verificationUrl}" style="display: inline-block; padding: 10px 20px; background-color: #4a90e2; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Verify Email</a>
+          <p><strong>This link expires in 24 hours.</strong></p>
+          <p>If you didn't request this, please ignore this email.</p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="font-size: 0.8em; color: #777;">HasthaVeedhi Market Platform</p>
+        </div>
       `
     };
 
@@ -31,6 +37,11 @@ exports.sendVerificationEmail = async (email, verificationToken) => {
     return { success: true };
   } catch (error) {
     console.error('Error sending email:', error);
-    throw new Error('Failed to send verification email');
+    throw new Error('Failed to send verification email: ' + error.message);
   }
 };
+
+module.exports = {
+  transporter,
+  sendVerificationEmail
+};

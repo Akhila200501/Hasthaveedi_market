@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/api';
+import { login, register, resendVerification } from '../services/api';
 import '../styles/AuthPage.css';
 
 const AuthPage = () => {
@@ -70,22 +70,11 @@ const AuthPage = () => {
   const handleResendCode = async () => {
     setMessage('Sending new verification email...');
     try {
-      const response = await fetch('/auth/resend-verification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email })
-      });
-  
-      const result = await response.json();
-      
-      if (response.ok) {
-        setMessage(result.message);
-        startResendTimer();
-      } else {
-        setMessage(result.error || 'Failed to resend verification');
-      }
+      const result = await resendVerification({ email: form.email });
+      setMessage(result.message || 'Verification email resent');
+      startResendTimer();
     } catch (err) {
-      setMessage('Failed to connect to server');
+      setMessage(err.message || 'Failed to connect to server');
     }
   };
 
@@ -97,23 +86,12 @@ const AuthPage = () => {
         return;
       }
   
-      const response = await fetch('/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
-      });
-  
-      const result = await response.json();
-      
-      if (response.ok) {
-        setIsEmailSent(true);
-        setMessage(result.message);
-        startResendTimer();
-      } else {
-        setMessage(result.error || 'Registration failed');
-      }
+      const result = await register(form);
+      setIsEmailSent(true);
+      setMessage(result.message || 'Registration successful');
+      startResendTimer();
     } catch (err) {
-      setMessage('Failed to connect to server');
+      setMessage(err.message || 'Registration failed');
     }
   };
   
