@@ -11,7 +11,11 @@ const transporter = nodemailer.createTransport({
 
 const sendVerificationEmail = async (email, verificationToken) => {
   try {
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+    const FRONTEND_URL = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' 
+      ? 'https://hasthaveedi-market-akhila.onrender.com' 
+      : 'http://localhost:3000');
+    
+    const verificationUrl = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
 
     const mailOptions = {
