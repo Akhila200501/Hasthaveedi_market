@@ -66,7 +66,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(buildPath));
 
   app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/auth')) {
       res.sendFile(path.join(buildPath, 'index.html'));
     }
   });
