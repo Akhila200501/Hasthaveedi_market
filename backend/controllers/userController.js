@@ -8,9 +8,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 exports.register = async (req, res) => {
   try {
     const { username, phone, email, password, role } = req.body;
+    const lowerEmail = email.toLowerCase();
 
     // Check if user exists by email
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: lowerEmail });
 
     // Also check if username exists
     const existingUsername = await User.findOne({ username });
@@ -46,7 +47,7 @@ exports.register = async (req, res) => {
       } catch (mailError) {
         console.error('Mail Error:', mailError);
         return res.status(200).json({ 
-          message: 'Account updated, but verification email could not be sent. Please contact support.',
+          message: `Account updated, but verification email could not be sent. Error: ${mailError.message}`,
           isResent: true
         });
       }
@@ -97,9 +98,10 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+  const lowerEmail = email.toLowerCase();
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: lowerEmail });
     
     if (!user) {
       return res.status(401).json({ message: 'No account found with this email' });

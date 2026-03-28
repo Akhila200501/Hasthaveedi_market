@@ -30,18 +30,14 @@ router.post('/refresh', async (req, res) => {
 // Add this test route to your authRoutes.js
 router.get('/test-email', async (req, res) => {
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
-      to: 'recipient@example.com',
-      subject: 'Test Email',
-      text: 'This is a test email'
-    });
+    await sendVerificationEmail(req.query.email || 'test@example.com', 'test-token-123');
     res.send('Email sent successfully');
   } catch (error) {
     console.error('Email error:', error);
-    res.status(500).send('Failed to send email');
+    res.status(500).send('Failed to send email: ' + error.message);
   }
 });
+
 
 router.get('/verify-email', async (req, res) => {
   try {
@@ -52,11 +48,23 @@ router.get('/verify-email', async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({ email: decoded.email });
+    console.log('Verification Request:', {
+      tokenProvided: token.substring(0, 20) + '...',
+      emailFromToken: decoded.email
+    });
+
+    const user = await User.findOne({ email: decoded.email.toLowerCase() });
 
     if (!user) {
+      console.log('Verification Error: User not found for email', decoded.email);
       return res.status(400).json({ error: 'Invalid verification token' });
     }
+
+    console.log('User found in DB:', {
+      email: user.email,
+      storedTokenMatches: user.verificationToken === token,
+      isVerified: user.isVerified
+    });
 
     if (user.isVerified) {
       return res.status(200).json({ 
@@ -66,6 +74,10 @@ router.get('/verify-email', async (req, res) => {
     }
 
     if (user.verificationToken !== token) {
+      console.log('Token mismatch!', {
+        received: token.substring(0, 10),
+        stored: user.verificationToken ? user.verificationToken.substring(0, 10) : 'NULL'
+      });
       return res.status(400).json({ error: 'Invalid or expired verification token' });
     }
 

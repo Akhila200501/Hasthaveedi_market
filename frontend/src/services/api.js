@@ -120,7 +120,7 @@ export const refreshToken = async () => {
   }
 };
 export const askGemini = async (prompt) => {
-  const response = await fetch("/api/gemini/chat", {
+  const response = await fetch(`${API_URL}/api/gemini/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt }),
