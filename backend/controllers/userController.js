@@ -42,15 +42,10 @@ exports.register = async (req, res) => {
       existingUser.verificationSentAt = new Date();
       await existingUser.save();
 
-      try {
-        await sendVerificationEmail(email, verificationToken);
-      } catch (mailError) {
-        console.error('Mail Error:', mailError);
-        return res.status(200).json({ 
-          message: `Account updated, but verification email could not be sent. Error: ${mailError.message}`,
-          isResent: true
-        });
-      }
+      // Send email asynchronously so it doesn't block the response
+      sendVerificationEmail(email, verificationToken).catch(mailError => {
+        console.error('Background Mail Error:', mailError);
+      });
       
       return res.status(200).json({ 
         message: 'Verification email resent. Please check your inbox to complete registration.',
@@ -70,15 +65,10 @@ exports.register = async (req, res) => {
       verificationSentAt: new Date()
     });
 
-    try {
-      await sendVerificationEmail(email, verificationToken);
-    } catch (mailError) {
-      console.error('Mail Error:', mailError);
-      return res.status(201).json({ 
-        message: 'Registration successful! (Warning: Verification email could not be sent. Please contact support.)',
-        isNewUser: true
-      });
-    }
+    // Send email asynchronously
+    sendVerificationEmail(email, verificationToken).catch(mailError => {
+      console.error('Background Mail Error:', mailError);
+    });
 
     res.status(201).json({ 
       message: 'Registration successful! Please check your email for verification.',

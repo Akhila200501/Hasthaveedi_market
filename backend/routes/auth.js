@@ -132,8 +132,10 @@ router.post('/resend-verification', async (req, res) => {
     user.verificationSentAt = new Date();
     await user.save();
 
-    // Send email
-    await sendVerificationEmail(email, verificationToken);
+    // Send email asynchronously
+    sendVerificationEmail(email, verificationToken).catch(mailError => {
+      console.error('Background Mail Error:', mailError);
+    });
 
     res.status(200).json({ 
       message: 'New verification email sent. Please check your inbox.' 
