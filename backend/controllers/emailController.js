@@ -19,7 +19,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
 
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USERNAME,
       to: email,
       subject: 'Verify Your Email - HasthaVeedhi',
       text: `Welcome to HasthaVeedhi!\n\nPlease click here to verify your email: ${verificationUrl}\n\nThis link expires in 24 hours.`,
