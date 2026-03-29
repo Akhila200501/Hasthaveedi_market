@@ -18,6 +18,8 @@ console.log('Nodemailer configured with:', {
 });
 
 
+let lastEmailError = "No errors yet. Email system initialized.";
+
 const sendVerificationEmail = async (email, verificationToken) => {
   try {
     const FRONTEND_URL = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' 
@@ -47,14 +49,20 @@ const sendVerificationEmail = async (email, verificationToken) => {
 
     await transporter.sendMail(mailOptions);
     console.log(`Verification email sent to ${email}`);
+    lastEmailError = `Success! Last email sent to ${email} at ${new Date().toISOString()}`;
     return { success: true };
   } catch (error) {
     console.error('Error sending email:', error);
+    lastEmailError = `Failed at ${new Date().toISOString()}: ` + error.message;
     throw new Error('Failed to send verification email: ' + error.message);
   }
 };
 
+const getLastEmailError = () => lastEmailError;
+
 module.exports = {
   transporter,
-  sendVerificationEmail
-};
+  sendVerificationEmail,
+  getLastEmailError
+};
+

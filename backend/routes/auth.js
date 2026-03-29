@@ -145,4 +145,12 @@ router.post('/resend-verification', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// DEBUG ROUTE: Expose the last email error so we can debug Render without logs
+const { getLastEmailError } = require('../controllers/emailController');
+router.get('/email-health', (req, res) => {
+  const status = getLastEmailError();
+  res.send(`<h1>Email System Status:</h1><p>${status}</p>`);
+});
+
 module.exports = router;
