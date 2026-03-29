@@ -2,12 +2,21 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE,
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // use SSL
   auth: {
     user: process.env.EMAIL_USERNAME,
     pass: process.env.EMAIL_PASSWORD
   }
 });
+
+console.log('Nodemailer configured with:', {
+  host: 'smtp.gmail.com',
+  user: process.env.EMAIL_USERNAME,
+  hasPassword: !!process.env.EMAIL_PASSWORD
+});
+
 
 const sendVerificationEmail = async (email, verificationToken) => {
   try {
