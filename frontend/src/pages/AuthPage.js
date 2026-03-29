@@ -17,6 +17,7 @@ const AuthPage = () => {
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   
   // Prevent logged-in users from seeing the login page
@@ -98,6 +99,8 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
+      setMessage('');
       if (isRegister) {
         await handleSendVerificationCode();
       } else {
@@ -108,7 +111,9 @@ const AuthPage = () => {
         navigate(result.role === 'customer' ? '/customer-map' : '/seller-dashboard');
       }
     } catch (error) {
-      setMessage(error.message || 'Login failed');
+      setMessage(error.message || 'Action failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -189,8 +194,12 @@ const AuthPage = () => {
           </div>
         )}
 
-        <button type="submit" className="btn btn-primary submit-btn">
-          {isRegister ? 'Register' : 'Login'}
+        <button 
+          type="submit" 
+          className="btn btn-primary submit-btn"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Processing...' : (isRegister ? 'Register' : 'Login')}
         </button>
       </form>
 
